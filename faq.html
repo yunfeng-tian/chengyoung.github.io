@@ -15,7 +15,7 @@
   <meta property="og:description" content="Frequently asked questions about LicenseDesktop." />
   <meta property="og:url" content="https://chengyoung.com/faq.html" />
   <meta property="og:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="FAQ — LicenseDesktop" />
   <meta name="twitter:description" content="Frequently asked questions about LicenseDesktop." />
   <meta name="twitter:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
@@ -34,7 +34,7 @@
         <a href="contact.html">Contact</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
-        <a href="zh/index.html" lang="zh-CN" class="lang">中文</a>
+        <a href="zh/faq.html" lang="zh-CN" class="lang">中文</a>
       </nav>
     </div>
   </header>
@@ -45,19 +45,34 @@
       <p class="updated">Answers to common questions about LicenseDesktop.</p>
 
       <h2>1. How does offline signing protect my license keys?</h2>
-      <p>Activation codes are signed locally on your machine using asymmetric (RSA/JWT) signing. Your private signing keys never leave your computer — there is no key escrow and no cloud dependency for signing.</p>
+      <p>Activation codes are signed locally on your machine using asymmetric (RSA/JWT) signing. Your private signing keys never leave your computer — there is no key escrow and no cloud dependency for signing or license management.</p>
 
-      <h2>2. Which platforms and technologies are supported?</h2>
+      <h2>2. Does LicenseDesktop require internet?</h2>
+      <p>No. ChengYoung LicenseDesktop is an offline-first license management system for software vendors. License signing and validation run entirely on your machine — your private keys and business data stay local. Internet is required only for optional services such as online purchase, updates, and encrypted cloud backup.</p>
+
+      <h2>3. Where is my data stored?</h2>
+      <p>All data (customers, products, licenses, financial records) is stored locally on your machine in an SQLite database. Nothing is uploaded to any server automatically. Optional encrypted cloud backup is available for off-site protection.</p>
+
+      <h2>4. Which platforms and technologies are supported?</h2>
       <p>LicenseDesktop currently runs on <strong>Windows 10 / 11 (x64)</strong>. It is built with <strong>Electron, React and TypeScript</strong>. Cross-platform support is planned for future releases.</p>
 
-      <h2>3. Can I migrate a license if my computer breaks?</h2>
+      <h2>5. Can I migrate my LicenseDesktop data to a new computer?</h2>
       <p>Yes. Use the built-in backup &amp; restore feature to move your data (including issued activation codes) to a new machine. Backups are verified with SHA-256 before restore.</p>
 
-      <h2>4. Is pricing one-time or a subscription?</h2>
-      <p>Licenses are annual subscriptions — Basic $49, Professional $99 and Enterprise $149 per year (each is a 12-month license). <strong>1 authorization month = 30 days.</strong> Licenses are time-limited, not perpetual, and can be renewed at expiry.</p>
+      <h2>6. Can my customers transfer a license to a new machine?</h2>
+      <p>Yes. The re-host (machine transfer) feature allows you to revoke an existing activation code and issue a new one bound to the customer's new machine code. This feature requires the Professional edition or above.</p>
 
-      <h2>5. Do you provide source code?</h2>
-      <p>The full source code is not offered. We provide an offline license validation SDK / integration package so you can validate activation codes in your own software.</p>
+      <h2>7. Is pricing one-time or a subscription?</h2>
+      <p>Licenses are annual subscriptions — Basic $49, Professional $99 and Enterprise $149 per year (each is a 12-month license). <strong>1 authorization month = 30 days.</strong> Licenses are time-limited, not perpetual, and can be renewed at expiry. Multi-tenant support is planned for Q1 2027.</p>
+
+      <h2>8. What happens when my license expires?</h2>
+      <p>Your data remains accessible — you can view, export, and back up all existing data. License generation and other write operations are blocked until you renew. Renewal pricing is shown at checkout.</p>
+
+      <h2>9. Do you offer refunds?</h2>
+      <p>Activation codes are digital goods. A full refund is available within 7 days of purchase if the license has <em>not</em> been activated/claimed. See <a href="terms.html">Terms of Service</a> for details.</p>
+
+      <h2>10. Do you provide source code?</h2>
+      <p>The full source code is not offered. We provide an offline license validation integration package so you can validate activation codes in your own software.</p>
     </section>
   </main>
 
