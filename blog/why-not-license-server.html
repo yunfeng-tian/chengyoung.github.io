@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline License Keys: Why I Don't Use a Third-Party License Server</title>
+  <meta name="description" content="License keys are customer assets. Here's why an offline-first licensing approach keeps signing keys on your machine, avoids single points of failure, and respects offline use." />
+  <link rel="canonical" href="https://chengyoung.com/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="x-default" href="https://chengyoung.com/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="en" href="https://chengyoung.com/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://chengyoung.com/zh/blog/why-not-license-server.html" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  <meta name="author" content="ChengYoung" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="ChengYoung · LicenseDesktop" />
+  <meta property="og:title" content="Offline License Keys: Why I Don't Use a Third-Party License Server" />
+  <meta property="og:description" content="License keys are customer assets. An offline-first licensing approach keeps your signing keys on your machine — no key escrow, no single point of failure." />
+  <meta property="og:url" content="https://chengyoung.com/blog/why-not-license-server.html" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  <meta property="article:published_time" content="2026-09-13T00:00:00+00:00" />
+  <meta property="article:modified_time" content="2026-09-13T00:00:00+00:00" />
+  <meta property="article:author" content="ChengYoung" />
+  <meta property="article:section" content="Licensing" />
+  <meta property="og:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Offline License Keys: Why I Don't Use a Third-Party License Server" />
+  <meta name="twitter:description" content="License keys are customer assets. Keep signing keys on your machine — no key escrow, no single point of failure." />
+  <meta name="twitter:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Why I Don't Store License Keys on Third-Party Servers",
+    "description": "License keys are customer assets. An offline-first licensing approach keeps signing keys on your machine — no key escrow, no single point of failure.",
+    "datePublished": "2026-09-13",
+    "dateModified": "2026-09-13",
+    "author": { "@type": "Person", "name": "ChengYoung" },
+    "publisher": { "@type": "Organization", "name": "ChengYoung", "logo": { "@type": "ImageObject", "url": "https://chengyoung.com/assets/logo-256.png", "width": 256, "height": 256 } },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "https://chengyoung.com/blog/why-not-license-server.html" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://chengyoung.com/index.html" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://chengyoung.com/blog/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "Offline License Keys: Why I Don't Use a Third-Party License Server" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="../index.html">ChengYoung · LicenseDesktop</a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="../download.html">Download</a>
+        <a href="../faq.html">FAQ</a>
+        <a href="index.html" aria-current="page">Blog</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../privacy.html">Privacy</a>
+        <a href="../terms.html">Terms</a>
+        <a href="../zh/blog/why-not-license-server.html" lang="zh-CN" class="lang">中文</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container legal">
+    <section class="section">
+      <p class="updated"><a href="index.html">← Blog</a> · September 13, 2026 · ChengYoung · 6 min read</p>
+      <h1>Why I Don't Store License Keys on Third-Party Servers</h1>
+
+      <p class="sub">License keys are customer assets. Here is the reasoning behind an offline-first licensing design — and what it honestly costs you.</p>
+
+      <div class="tldr-box">
+        <strong>Key takeaways</strong>
+        <ul style="margin:8px 0 0;padding-left:18px;">
+          <li>License keys are signed statements — the private key never needs to leave your machine.</li>
+          <li>Online license servers add data exposure and a single point of failure.</li>
+          <li>Offline-first trades instant revocation for data ownership and offline support.</li>
+          <li>It's a fit decision, not dogma.</li>
+        </ul>
+      </div>
+
+      <h2>The one-sentence version</h2>
+      <p>If your customers' license keys never touch a server you don't control, there is no key escrow, no single point of failure, and no reason for a customer to worry about what happens if your service disappears.</p>
+
+      <h2>What a license key actually is</h2>
+      <p>A license key is a cryptographically signed statement: <em>this machine is allowed to run this software until this date</em>. The private signing key is what makes it unforgeable. If that private key stays on your machine and only the public verification key ships with your app, then <strong>validating a license requires no network at all</strong> — the customer's computer checks the signature locally.</p>
+      <p>That property is the whole foundation of offline licensing: <strong>the signer is you, and only you.</strong> No middleman ever has to hold, forward, or "verify" your keys on your behalf.</p>
+
+      <h2>The hidden costs of online license servers</h2>
+      <p>License-as-a-service platforms are convenient — they handle issuing, validation, trials and revocations. But convenience comes with costs that are easy to underestimate when you are a small indie developer:</p>
+      <ul>
+        <li><strong>Data exposure.</strong> Every key you send to a server becomes part of that vendor's data surface. A breach or a disgruntled employee at the platform is not hypothetical — it is an attack surface you cannot control.</li>
+        <li><strong>Single point of failure.</strong> Your customers can no longer validate licenses when the service is down, when it is rate-limiting you, or when it quietly shuts down. Your product's revenue depends on a third party's uptime.</li>
+        <li><strong>Offline is a real requirement.</strong> A surprisingly large share of desktop users work offline or behind restrictive networks (factories, labs, government offices, air-gapped setups). If your licensing breaks offline, you are un-selling to exactly the customers who value your desktop app the most.</li>
+        <li><strong>Trust cost.</strong> Your customers have to trust that the platform is not logging every activation with your machine codes and your sales data.</li>
+      </ul>
+
+      <h2>How offline signing actually works</h2>
+      <p>The design is simple and battle-tested:</p>
+      <ol>
+        <li>Generate an RSA (or Ed25519) key pair. The <strong>private key stays on your machine</strong> — ideally in an OS-protected vault (DPAPI / Keychain / safeStorage), never embedded in your app, never uploaded.</li>
+        <li>Sign a compact JWT-style token with the private key: machine code, license type, issue/expiry timestamps, version range, edition.</li>
+        <li>Ship only the <strong>public key</strong> inside your app. On activation the app verifies the signature locally and checks the machine code matches.</li>
+        <li>Handle trials, renewals, re-hosting and revocation entirely with new signed tokens — all offline.</li>
+      </ol>
+      <p>Because the private key never leaves your machine, a breach at any third party cannot forge your licenses. There is simply nothing to steal server-side.</p>
+
+      <p>A minimal signing example (Node.js, runs on your machine only):</p>
+      <pre class="code-block"><code>// Sign a license token — the private key never leaves this machine
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { machine: 'ABC1-DEF2-3456-7890', edition: 'pro', type: 12, exp: 1798761600 },
+  privateKey,            // OS-protected vault, not embedded in the app
+  { algorithm: 'RS256' }
+);
+// Ship only the public key; validate locally with jwt.verify(...)</code></pre>
+
+      <figure class="blog-fig">
+        <img src="../assets/img/screenshots/main.png" alt="LicenseDesktop offline license management — main dashboard" loading="lazy" />
+        <figcaption>Signing, renewing and revoking licenses entirely offline in LicenseDesktop.</figcaption>
+      </figure>
+
+      <h2>What offline honestly costs you</h2>
+      <p>I built <a href="../index.html">LicenseDesktop</a> as an offline-first licensing system, and I want to be straight about the trade-offs:</p>
+      <ul>
+        <li><strong>No instant cloud revocation.</strong> A revoked license only stops working on the customer's next check-in / renewal attempt. If you need battlefield-grade kill-switches, you need a phone-home channel — offline can't do that alone.</li>
+        <li><strong>No hosted analytics of activations.</strong> You get activation records in your local database instead of a SaaS dashboard. That is a feature (privacy), but it means you own your reporting.</li>
+        <li><strong>Online purchase is a separate, optional layer.</strong> Payment still needs the internet. In my case, the purchase flow and license <em>fulfillment</em> can be online while the signing core stays local — the storefront and the key vault are decoupled.</li>
+      </ul>
+
+      <h2>When a server is the right answer</h2>
+      <p>If your product is subscription-SaaS, if you genuinely need device-count enforcement with real-time lockout, or if your customers expect SSO — then a hosted licensing layer is the pragmatic choice. Offline-first is not dogma; it is a fit decision. But for desktop software sold to developers, privacy-minded users, or B2B buyers who value their own data, "your keys never leave your machine" is a positioning advantage you can actually defend in a sales call.</p>
+
+      <h2>What this looks like in practice</h2>
+      <p>In <a href="../index.html">LicenseDesktop</a>, the private key is read only by the main process and stored in an OS-protected vault; the renderer never sees it. Activation codes are RSA-signed JWTs validated against a public key, machine-code-bound, and protected against clock rollback with a time high-water mark (file + registry). Everything — issuing, renewal, re-hosting, revocation, even a 14-day trial — works offline on a clean Windows machine. Online purchase, updates and encrypted cloud backup are optional extras that sit on top of the offline core.</p>
+      <p>If you want to try the offline-first workflow: <a href="../download.html">download the free 14-day trial</a>, issue your first signed license in about ten minutes, and see whether the trade-offs above fit your product. If you'd rather ask a question first, <a href="../contact.html">reach out</a> — I read every message.</p>
+
+      <h2>Related reading</h2>
+      <ul>
+        <li>Offline vs online licensing — how indie developers should choose <em>(up next in this series)</em></li>
+        <li>How license key verification actually works with RSA <em>(up next in this series)</em></li>
+        <li>Preventing clock rollback in offline licensing <em>(up next in this series)</em></li>
+      </ul>
+
+      <p class="updated" style="margin-top:18px;">
+        Share: <a href="https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fchengyoung.com%2Fblog%2Fwhy-not-license-server.html&amp;t=Offline%20License%20Keys">Hacker News</a> ·
+        <a href="https://www.reddit.com/submit?url=https%3A%2F%2Fchengyoung.com%2Fblog%2Fwhy-not-license-server.html&amp;title=Offline%20License%20Keys">Reddit</a> ·
+        <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fchengyoung.com%2Fblog%2Fwhy-not-license-server.html&amp;text=Offline%20License%20Keys">X</a>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div>
+        <strong>ChengYoung · LicenseDesktop</strong>
+        <p>An independent developer project.</p>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="../download.html">Download</a>
+        <a href="../faq.html">FAQ</a>
+        <a href="index.html">Blog</a>
+        <a href="../contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="container" style="margin-top:14px; font-size:13px; opacity:0.85;">
+      Licenses are annual subscriptions &middot; 1 authorization month = 30 days.
+    </div>
+  </footer>
+
+  <!-- GoatCounter 匿名访问统计（chengyoung.com，无 cookie、无个人数据） -->
+  <script data-goatcounter="https://chengyoung.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>离线授权：为什么我不把授权密钥放在第三方服务器</title>
+  <meta name="description" content="授权密钥是客户资产。离线优先的授权设计把签名私钥留在你自己的机器上——没有密钥托管、没有单点故障、尊重离线使用。" />
+  <link rel="canonical" href="https://chengyoung.com/zh/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="x-default" href="https://chengyoung.com/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="en" href="https://chengyoung.com/blog/why-not-license-server.html" />
+  <link rel="alternate" hreflang="zh-CN" href="https://chengyoung.com/zh/blog/why-not-license-server.html" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+  <meta name="author" content="ChengYoung" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="ChengYoung · LicenseDesktop" />
+  <meta property="og:title" content="离线授权密钥：为什么我不把授权密钥放在第三方服务器" />
+  <meta property="og:description" content="授权密钥是客户资产。离线优先的授权设计把签名私钥留在你自己的机器上——没有密钥托管、没有单点故障。" />
+  <meta property="og:url" content="https://chengyoung.com/zh/blog/why-not-license-server.html" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="article:published_time" content="2026-09-13T00:00:00+00:00" />
+  <meta property="article:author" content="ChengYoung" />
+  <meta property="article:section" content="授权" />
+  <meta property="og:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="离线授权：为什么我不把授权密钥放在第三方服务器" />
+  <meta name="twitter:description" content="授权密钥是客户资产。离线优先的授权设计把签名私钥留在你自己的机器上——没有密钥托管、没有单点故障。" />
+  <meta name="twitter:image" content="https://chengyoung.com/assets/img/screenshots/main.png" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "离线授权：为什么我不把授权密钥放在第三方服务器",
+    "description": "授权密钥是客户资产。离线优先的授权设计把签名私钥留在你自己的机器上——没有密钥托管、没有单点故障。",
+    "datePublished": "2026-09-13",
+    "dateModified": "2026-09-13",
+    "author": { "@type": "Person", "name": "ChengYoung" },
+    "publisher": { "@type": "Organization", "name": "ChengYoung", "logo": { "@type": "ImageObject", "url": "https://chengyoung.com/assets/logo-256.png", "width": 256, "height": 256 } },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "https://chengyoung.com/zh/blog/why-not-license-server.html" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://chengyoung.com/zh/index.html" },
+      { "@type": "ListItem", "position": 2, "name": "博客", "item": "https://chengyoung.com/zh/blog/index.html" },
+      { "@type": "ListItem", "position": 3, "name": "为什么我不把授权密钥放在第三方服务器" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="../index.html">ChengYoung · LicenseDesktop</a>
+      <nav class="nav-links">
+        <a href="../index.html">首页</a>
+        <a href="../pricing.html">定价</a>
+        <a href="../download.html">下载</a>
+        <a href="../faq.html">常见问题</a>
+        <a href="index.html" aria-current="page">博客</a>
+        <a href="../contact.html">联系我们</a>
+        <a href="../privacy.html">隐私政策</a>
+        <a href="../terms.html">服务条款</a>
+        <a href="../../blog/why-not-license-server.html" lang="en" class="lang">English</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container legal">
+    <section class="section">
+      <p class="updated"><a href="index.html">← 博客</a> · 2026-09-13 · ChengYoung · 约 6 分钟阅读</p>
+      <h1>为什么我不把授权密钥放在第三方服务器</h1>
+
+      <p class="sub">授权密钥是客户资产。以下是我选择「离线优先」授权设计的理由——以及它诚实的代价。</p>
+
+      <div class="tldr-box">
+        <strong>核心结论</strong>
+        <ul style="margin:8px 0 0;padding-left:18px;">
+          <li>授权码是签名后的声明——私钥永远不需要离开你的机器。</li>
+          <li>在线授权服务器带来数据暴露面与单点故障。</li>
+          <li>离线优先用「即时吊销」换取「数据自主」与「离线可用」。</li>
+          <li>这是适配决策，不是教条。</li>
+        </ul>
+      </div>
+
+      <h2>一句话版本</h2>
+      <p>如果你的客户授权密钥从不经过你无法控制的服务器，就没有密钥托管、没有单点故障，客户也无需担心你的服务消失后会发生什么。</p>
+
+      <h2>授权码到底是什么</h2>
+      <p>授权码是一个加密签名的声明：<em>这台机器被允许在某个日期之前运行这个软件</em>。让它不可伪造的是签名私钥。如果私钥留在你的机器上、只有公钥随应用分发，那么<strong>验证授权完全不需要网络</strong>——客户电脑在本地校验签名即可。</p>
+      <p>这正是离线授权的全部基础：<strong>签名者是你，且只有你。</strong>没有任何中间人需要替你持有、转发或"验证"你的密钥。</p>
+
+      <h2>在线授权服务器的隐性代价</h2>
+      <p>授权即服务（license-as-a-service）平台很方便——它们替你处理签发、验证、试用和吊销。但对小型独立开发者来说，便利的代价很容易被低估：</p>
+      <ul>
+        <li><strong>数据暴露面。</strong>你发给服务器的每个密钥都成为该平台数据面的一部分。平台被入侵或内部人员滥用并非假设——这是你无法控制的攻击面。</li>
+        <li><strong>单点故障。</strong>服务宕机、限流或悄悄关闭时，你的客户将无法验证授权。你的收入依赖第三方的可用性。</li>
+        <li><strong>离线是真实需求。</strong>相当大比例的桌面用户会离线工作或身处受限网络（工厂、实验室、政企内网、隔离环境）。如果授权在离线时失效，你恰恰在劝退最需要桌面应用的客户。</li>
+        <li><strong>信任成本。</strong>客户必须相信平台不会记录每一次激活（含机器码与销售数据）。</li>
+      </ul>
+
+      <h2>离线签名实际怎么工作</h2>
+      <p>设计简单且久经考验：</p>
+      <ol>
+        <li>生成 RSA（或 Ed25519）密钥对。<strong>私钥留在你的机器上</strong>——最好放在操作系统保护的凭据库（DPAPI / Keychain / safeStorage），绝不内嵌进应用、绝不上传。</li>
+        <li>用私钥签发一个紧凑的 JWT 风格令牌：机器码、授权类型、签发/到期时间戳、版本区间、档位。</li>
+        <li>应用内只内置<strong>公钥</strong>。激活时本地验签，并校验机器码匹配。</li>
+        <li>试用、续期、换机与吊销全部通过新的签名令牌完成——全程离线。</li>
+      </ol>
+      <p>因为私钥从不离开你的机器，任何第三方的数据泄露都无法伪造你的授权。服务器端根本没有可偷的东西。</p>
+
+      <p>最小签名示例（Node.js，只在你机器上运行）：</p>
+      <pre class="code-block"><code>// 签发授权令牌——私钥从不离开这台机器
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { machine: 'ABC1-DEF2-3456-7890', edition: 'pro', type: 12, exp: 1798761600 },
+  privateKey,            // 系统凭据库保护，不内嵌进应用
+  { algorithm: 'RS256' }
+);
+// 只分发公钥；本地 jwt.verify(...) 验签</code></pre>
+
+      <figure class="blog-fig">
+        <img src="../../assets/img/screenshots/main.png" alt="LicenseDesktop 离线授权管理——主界面" loading="lazy" />
+        <figcaption>在 LicenseDesktop 中完全离线地签发、续期与吊销授权。</figcaption>
+      </figure>
+
+      <h2>离线诚实地说，你付出了什么</h2>
+      <p>我把 <a href="../index.html">LicenseDesktop</a> 做成离线优先的授权系统，我想坦诚地说清权衡：</p>
+      <ul>
+        <li><strong>没有云端的即时吊销。</strong>被吊销的授权要等到客户下次签到/续期尝试时才停止工作。如果你需要军规级的"一键封杀"，你需要一个回连通道——离线单靠自己做不了。</li>
+        <li><strong>没有托管的激活统计。</strong>你得到的是本地数据库里的激活记录，而不是 SaaS 仪表盘。这是隐私特性，但也意味着报表由你自己维护。</li>
+        <li><strong>在线购买是独立的可选层。</strong>支付仍然需要互联网。在我的方案里，购买流程与授权<em>履约</em>可以联网，而签名核心保持本地——店铺与密钥库解耦。</li>
+      </ul>
+
+      <h2>什么时候服务器才是正确答案</h2>
+      <p>如果你的产品是订阅 SaaS、确实需要设备数实时管控与即时锁定，或客户期待 SSO——那么托管授权层是务实选择。离线优先不是教条，而是适配决策。但对于面向开发者、隐私敏感用户或重视数据自主的 B2B 买家的桌面软件，"你的密钥永不离开你的机器"是一个在销售沟通中真正站得住脚的定位优势。</p>
+
+      <h2>在实践中的样子</h2>
+      <p>在 <a href="../index.html">LicenseDesktop</a> 中，私钥只由主进程读取并存在系统保护的凭据库中；渲染进程永远看不到它。激活码是 RSA 签名的 JWT，用公钥验证、绑定机器码，并用时间高水位（文件 + 注册表双存储）抵御时钟回拨。签发、续期、换机、吊销，甚至 14 天试用——在干净无网的 Windows 机器上全部可用。在线购买、更新与加密云备份是叠加在离线核心之上的可选功能。</p>
+      <p>如果你想试试离线优先的工作流：<a href="../download.html">下载免费 14 天试用版</a>，大约十分钟签出第一张授权码，看看上面的权衡是否适合你的产品。如果更想先问个问题，<a href="../contact.html">联系我</a>——每条消息我都会读。</p>
+
+      <h2>相关阅读</h2>
+      <ul>
+        <li>离线授权 vs 在线授权：独立开发者怎么选 <em>（系列预告）</em></li>
+        <li>授权码验证的原理：RSA 签名 <em>（系列预告）</em></li>
+        <li>离线授权中的时钟回拨防护 <em>（系列预告）</em></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div>
+        <strong>ChengYoung · LicenseDesktop</strong>
+        <p>独立开发者项目。</p>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html">首页</a>
+        <a href="../pricing.html">定价</a>
+        <a href="../download.html">下载</a>
+        <a href="../faq.html">常见问题</a>
+        <a href="index.html">博客</a>
+        <a href="../contact.html">联系我们</a>
+      </div>
+    </div>
+    <div class="container" style="margin-top:14px; font-size:13px; opacity:0.85;">
+      授权为年度订阅 · 1 授权月 = 30 天
+    </div>
+  </footer>
+
+  <!-- GoatCounter 匿名访问统计（chengyoung.com，无 cookie、无个人数据） -->
+  <script data-goatcounter="https://chengyoung.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
